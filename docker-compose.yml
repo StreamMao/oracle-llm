@@ -1,0 +1,24 @@
+services:
+  llm-server:
+    image: ghcr.io/ggml-org/llama.cpp:server
+    container_name: oracle-llm-server
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8080}:8080"
+    volumes:
+      - ./models:/models:ro
+    environment:
+      - LLAMA_ARG_MODEL=/models/${MODEL_FILENAME:-qwen2.5-3b-instruct-q4_k_m.gguf}
+      - LLAMA_ARG_HOST=0.0.0.0
+      - LLAMA_ARG_PORT=8080
+      - LLAMA_ARG_CTX_SIZE=${CTX_SIZE:-2048}
+      - LLAMA_ARG_THREADS=${THREADS:-2}
+      - LLAMA_ARG_N_PARALLEL=${N_PARALLEL:-1}
+      - LLAMA_ARG_API_KEY=${API_KEY:-}
+      - LLAMA_ARG_FLASH_ATTN=${FLASH_ATTN:-0}
+      - LLAMA_ARG_NO_WARMUP=1
+      - LLAMA_ARG_VERBOSE=0
+    deploy:
+      resources:
+        limits:
+          memory: ${MAX_MEMORY:-3500M}

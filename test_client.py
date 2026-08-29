@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
-Test client for oracle-llm (Qwen3-0.6B)
+Test client for Oracle ARM LLM Server (OpenAI-compatible)
 Usage:
-    python3 test_client.py https://<your-oracle-llm-url>
+    python3 test_client.py http://<YOUR_ORACLE_PUBLIC_IP>:8080
+    python3 test_client.py http://localhost:8080
 """
 
 import sys
@@ -12,7 +13,7 @@ import urllib.request
 import urllib.error
 
 def wait_for_ready(base_url: str, max_retries: int = 15, delay: float = 2.0) -> bool:
-    """Wait for server to finish loading model into memory during cold-start."""
+    """Wait for llama.cpp server to finish loading model into memory."""
     health_url = f"{base_url.rstrip('/')}/health"
     print("Checking server readiness", end="", flush=True)
 
@@ -42,7 +43,7 @@ def chat_stream(base_url: str, prompt: str):
     url = f"{base_url.rstrip('/')}/v1/chat/completions"
     payload = {
         "messages": [
-            {"role": "system", "content": "You are a helpful and concise financial AI assistant."},
+            {"role": "system", "content": "You are a helpful and concise AI assistant."},
             {"role": "user", "content": prompt}
         ],
         "temperature": 0.7,
@@ -91,18 +92,16 @@ def main():
     if len(sys.argv) > 1:
         base_url = sys.argv[1]
     else:
-        base_url = input("Enter Oracle LLM Service URL: ").strip()
+        base_url = input("Enter Oracle LLM Server URL (default: http://localhost:8080): ").strip()
+        if not base_url:
+            base_url = "http://localhost:8080"
 
-    if not base_url:
-        print("Error: URL cannot be empty.")
-        sys.exit(1)
-
-    print(f"\nConnecting to Oracle LLM: {base_url}")
+    print(f"\nConnecting to: {base_url}")
     wait_for_ready(base_url)
 
     # Sample queries
     chat_stream(base_url, "你好，请用一句话介绍你自己。")
-    chat_stream(base_url, "请翻译并提取要点：Tesla announced Q3 vehicle deliveries reached 462,890 units, up 6.4% year-over-year.")
+    chat_stream(base_url, "请简要分析一下为什么在 ARM 架构服务器上运行量化小模型具有高性价比？")
 
 if __name__ == "__main__":
     main()
